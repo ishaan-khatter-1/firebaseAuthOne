@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "573500813054",
+    "project_id": "t2firebaseauthfirst",
+    "storage_bucket": "t2firebaseauthfirst.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:573500813054:android:320aeec27c91ca91413faf",
+        "android_client_info": {
+          "package_name": "com.t2firebaseauthfirst"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "573500813054-e2vac53938nljs9ccajms4p32lq6ct53.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.t2firebaseauthfirst",
+            "certificate_hash": "b37287da89523ff62c892397bd0d8d304826b6fd"
+          }
+        },
+        {
+          "client_id": "573500813054-45l22m26873d1seo4vrgd5kij584g2vv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcTMgUUQqXxLRtA-Wqb6gSokIxmJj_Ymo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "573500813054-45l22m26873d1seo4vrgd5kij584g2vv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

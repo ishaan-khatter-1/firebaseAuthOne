@@ -1,0 +1,16 @@
+bool isInTimeRange(DateTime? startTime, DateTime? endTime) {
+  if (startTime != null && endTime != null) {
+    final now = DateTime.now();
+    final currentTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      now.hour,
+      now.minute,
+    );
+
+    return currentTime.isAfter(startTime) && currentTime.isBefore(endTime);
+  }
+  
+  return false; // Return false if either startTime or endTime is null
+}
