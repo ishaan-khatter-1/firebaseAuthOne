@@ -75,7 +75,7 @@ const Login = () => {
             await auth().currentUser?.sendEmailVerification();
             await auth().signOut();
           }
-          dispatch(StackActions.replace('Home'));
+          // dispatch(StackActions.replace('Home'));
         })
         .catch(error => {
           if (error.code === 'auth/operation-not-allowed') {

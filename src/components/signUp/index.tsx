@@ -1,6 +1,7 @@
 import {Alert, View} from 'react-native';
 import React, {useRef, useState} from 'react';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 import CommonPage from '../commonPage';
 import {useNavigation} from '@react-navigation/native';
@@ -104,29 +105,27 @@ const SignUp = () => {
       return null;
     }
     if (emailRex.test(email) && passRex.test(password)) {
-      await auth()
+      const res = await auth()
         .createUserWithEmailAndPassword(email, password)
         .then(async () => {
-          // const {email, uid} = userCredentials.user;
-          // const userData = {
-          //   email: email,
-          //   uid: uid,
-          // };
-          console.log('User account created & signed in!');
-          // console.log('HI' + userCredentials.user);
-          console.log(auth().currentUser);
-          await auth().currentUser?.sendEmailVerification();
-          Alert.alert('Email verfication link sent');
-          await auth().signOut();
-          // if (auth().currentUser?.emailVerified) {
-          //   navigate('Home');
-          // }
-          // else {
-          //   await auth().signOut();
-          // }
+          const usersData = {
+            // id: ,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phoneNumber: phoneNumber,
+          };
+          await firestore().collection('users').add(usersData);
+          // console.log('res:: ' + res);  // undefined
 
-          // navigate('Home', {userData});
-          navigate('Login');
+          // fires;
+          // console.log('User account created & signed in!');
+          // console.log(auth().currentUser);
+          // await auth().currentUser?.sendEmailVerification();
+          // Alert.alert('Email verfication link sent');
+          // await auth().signOut();
+
+          // .navigate('Login');
         })
         .catch(error => {
           if (error.code === 'auth/email-already-in-use') {
