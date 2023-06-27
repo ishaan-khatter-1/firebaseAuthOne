@@ -4,12 +4,20 @@ import Lottie from 'lottie-react-native';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import ColorConstants from '../../assets/colorContants';
 import styles from './styles';
+import Auth from '@react-native-firebase/auth';
 
 const SplashScreen = () => {
   const {dispatch} = useNavigation();
+
   useEffect(() => {
     setTimeout(() => {
-      dispatch(StackActions.replace('Login'));
+      const unsubscribe = Auth().onAuthStateChanged(userData => {
+        console.log(userData);
+        userData !== null
+          ? dispatch(StackActions.replace('Home'))
+          : dispatch(StackActions.replace('Login'));
+      });
+      unsubscribe();
     }, 2000);
   }, []);
 

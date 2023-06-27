@@ -3,6 +3,7 @@ import React, {useRef, useState} from 'react';
 import auth from '@react-native-firebase/auth';
 
 import CommonPage from '../commonPage';
+import {StackActions, useNavigation} from '@react-navigation/native';
 
 const Login = () => {
   const values = ['Email', 'Enter Password'];
@@ -25,6 +26,7 @@ const Login = () => {
   const refArr = [dummyRef, passRef];
   const submitRefArr = [() => passRef.current.focus()];
   const blurOnSubmitValues = [false, true];
+  const {navigate, dispatch} = useNavigation();
 
   const returnKeyTypeValues = ['next', 'done'];
   const emailRex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -58,8 +60,22 @@ const Login = () => {
       auth()
         // .signInAnonymously()
         .signInWithEmailAndPassword(email, password)
-        .then(() => {
-          console.log('User signed in.');
+        .then(async userCredentials => {
+          console.log('User signed in.' + userCredentials.user);
+          // navigate('Home', {
+          //   userData: {
+          //     email: userCredentials.user.email,
+          //     uid: userCredentials.user.uid,
+          //   },
+          // });
+          if (userCredentials.user.emailVerified) {
+            dispatch(StackActions.replace('Home'));
+          } else {
+            Alert.alert('Please Verify through email');
+            await auth().currentUser?.sendEmailVerification();
+            await auth().signOut();
+          }
+          dispatch(StackActions.replace('Home'));
         })
         .catch(error => {
           if (error.code === 'auth/operation-not-allowed') {

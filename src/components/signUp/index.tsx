@@ -3,6 +3,7 @@ import React, {useRef, useState} from 'react';
 import auth from '@react-native-firebase/auth';
 
 import CommonPage from '../commonPage';
+import {useNavigation} from '@react-navigation/native';
 
 const SignUp = () => {
   const values = [
@@ -29,6 +30,7 @@ const SignUp = () => {
   const passRef = useRef();
   const confirmPassRef = useRef();
   const dummyRef = useRef();
+  const {navigate} = useNavigation();
 
   const refArr = [
     dummyRef,
@@ -55,7 +57,7 @@ const SignUp = () => {
   const firstNameRegex = /^[a-zA-Z]+$/;
   const lastNameRegex = /^[a-zA-Z]+(?:[-'\s][a-zA-Z]+)*$/;
   const phoneRegex = /^\d{10}$/;
-  const validation = () => {
+  const validation = async () => {
     // let emailValidation = validationFunctionEmail();
     // let passwordValidation = validationFunctionPassword();
     console.log(email);
@@ -102,10 +104,29 @@ const SignUp = () => {
       return null;
     }
     if (emailRex.test(email) && passRex.test(password)) {
-      auth()
+      await auth()
         .createUserWithEmailAndPassword(email, password)
-        .then(() => {
+        .then(async () => {
+          // const {email, uid} = userCredentials.user;
+          // const userData = {
+          //   email: email,
+          //   uid: uid,
+          // };
           console.log('User account created & signed in!');
+          // console.log('HI' + userCredentials.user);
+          console.log(auth().currentUser);
+          await auth().currentUser?.sendEmailVerification();
+          Alert.alert('Email verfication link sent');
+          await auth().signOut();
+          // if (auth().currentUser?.emailVerified) {
+          //   navigate('Home');
+          // }
+          // else {
+          //   await auth().signOut();
+          // }
+
+          // navigate('Home', {userData});
+          navigate('Login');
         })
         .catch(error => {
           if (error.code === 'auth/email-already-in-use') {
