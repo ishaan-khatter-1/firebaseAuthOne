@@ -13,11 +13,11 @@ const SplashScreen = () => {
     setTimeout(() => {
       const unsubscribe = Auth().onAuthStateChanged(userData => {
         console.log(userData);
-        userData !== null
+        userData !== null && userData.emailVerified
           ? dispatch(StackActions.replace('Home'))
           : dispatch(StackActions.replace('Login'));
+        unsubscribe();
       });
-      unsubscribe();
     }, 2000);
   }, []);
 

@@ -1,10 +1,11 @@
-import {Alert, View} from 'react-native';
+import {ActivityIndicator, Alert, View} from 'react-native';
 import React, {useRef, useState} from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 import CommonPage from '../commonPage';
 import {useNavigation} from '@react-navigation/native';
+import Snackbar from 'react-native-snackbar';
 
 const SignUp = () => {
   const values = [
@@ -23,6 +24,7 @@ const SignUp = () => {
   const [lastName, setlastName] = useState('');
   const [phoneNumber, setphoneNumber] = useState('');
   const [confirmPass, setconfirmPass] = useState('');
+  const [loading, setLoading] = useState(false);
   // const [opacityBtn, setOpacityBtn] = useState(0.4);
 
   const lastNameRef = useRef();
@@ -63,82 +65,147 @@ const SignUp = () => {
     // let passwordValidation = validationFunctionPassword();
     console.log(email);
     if (firstName === '') {
-      Alert.alert('first name cannot be empty');
+      // Alert.alert('first name cannot be empty');
+      Snackbar.show({
+        text: 'first name cannot be empty',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     } else if (!firstNameRegex.test(firstName)) {
-      Alert.alert('wrong first name');
+      // Alert.alert('wrong first name');
+      Snackbar.show({
+        text: 'wrong first name',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     }
     if (lastName === '') {
-      Alert.alert('last name cannot be empty');
+      // Alert.alert('last name cannot be empty');
+      Snackbar.show({
+        text: 'last name cannot be empty',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     } else if (!lastNameRegex.test(lastName)) {
-      Alert.alert('wrong last name');
+      // Alert.alert('wrong last name');
+      Snackbar.show({
+        text: 'wrong last name',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     }
     if (email === '') {
-      Alert.alert('Email field cannot be empty.');
+      // Alert.alert('Email field cannot be empty.');
+      Snackbar.show({
+        text: 'Email field cannot be empty.',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     } else if (!emailRex.test(email)) {
-      Alert.alert('Entry valid input in the form of example@xyz.xyz');
+      // Alert.alert('Entry valid input in the form of example@xyz.xyz');
+      Snackbar.show({
+        text: 'Entry valid input in the form of example@xyz.xyz',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     }
     if (phoneNumber === '') {
-      Alert.alert('Phone number cannot be empty');
+      // Alert.alert('Phone number cannot be empty');
+      Snackbar.show({
+        text: 'Phone number cannot be empty',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     } else if (!phoneRegex.test(phoneNumber)) {
-      Alert.alert('wrong phone number');
+      // Alert.alert('wrong phone number');
+      Snackbar.show({
+        text: 'wrong phone number',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     }
 
     if (password === '') {
-      Alert.alert('Password cannot be empty');
+      // Alert.alert('Password cannot be empty');
+      Snackbar.show({
+        text: 'Password cannot be empty',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     } else if (!passRex.test(password)) {
-      Alert.alert(
-        'Password must contain atleast 8 characters which must have at least 1 number, atleast 1 Uppercase letter, and atleast 1 special character.',
-      );
+      // Alert.alert(
+      //   'Password must contain atleast 8 characters which must have at least 1 number, atleast 1 Uppercase letter, and atleast 1 special character.',
+      // );
+      Snackbar.show({
+        text: 'password must contain atleast 8 characters, 1 number, 1 uppercase and lowercase letters, and 1 special character',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     }
     if (confirmPass !== password) {
-      Alert.alert('Confirm password does not matches the password');
+      // Alert.alert('Confirm password does not matches the password');
+      Snackbar.show({
+        text: 'Confirm password does not matches the password',
+        duration: Snackbar.LENGTH_SHORT,
+      });
       return null;
     }
+    setLoading(true);
     if (emailRex.test(email) && passRex.test(password)) {
-      const res = await auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then(async () => {
-          const usersData = {
-            // id: ,
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            phoneNumber: phoneNumber,
-          };
-          await firestore().collection('users').add(usersData);
-          // console.log('res:: ' + res);  // undefined
-
-          // fires;
-          // console.log('User account created & signed in!');
-          // console.log(auth().currentUser);
-          // await auth().currentUser?.sendEmailVerification();
-          // Alert.alert('Email verfication link sent');
-          // await auth().signOut();
-
-          // .navigate('Login');
-        })
-        .catch(error => {
-          if (error.code === 'auth/email-already-in-use') {
-            console.log('That email address is already in use!');
-          }
-
-          if (error.code === 'auth/invalid-email') {
-            console.log('That email address is invalid!');
-          }
-
-          console.error(error);
+      try {
+        const res = await auth().createUserWithEmailAndPassword(
+          email,
+          password,
+        );
+        const usersData = {
+          id: res.user.uid,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          phoneNumber: phoneNumber,
+        };
+        await firestore().collection('users').doc(res.user.uid).set(usersData);
+        // console.log('res:: ' + res);  // undefined
+        // fires;
+        // console.log('User account created & signed in!');
+        // console.log(auth().currentUser);
+        await auth().currentUser?.sendEmailVerification();
+        // await auth().
+        // await auth().currentUser?.
+        // Alert.alert('Email verfication link sent');
+        Snackbar.show({
+          text: 'Email verfication link sent',
+          duration: Snackbar.LENGTH_SHORT,
         });
+        await auth().signOut();
+
+        navigate('Login');
+      } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+          setLoading(false);
+
+          Snackbar.show({
+            text: 'Account already Exist',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+          console.log('That email address is already in use!');
+        }
+
+        if (error.code === 'auth/invalid-email') {
+          setLoading(false);
+
+          Snackbar.show({
+            text: 'Invalid Email',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+          console.log('That email address is invalid!');
+        }
+
+        console.error(error);
+      }
       // Alert.alert('Successfully Registered');
+      setLoading(false);
+
       return 1;
     }
   };
@@ -162,12 +229,24 @@ const SignUp = () => {
       <CommonPage
         headerText={'New User Registration'}
         inputVal={values}
-        btnText={'Register'}
+        btnText={
+          loading ? (
+            <View>
+              <ActivityIndicator size="large" color="white" />
+            </View>
+          ) : (
+            'Register'
+          )
+        }
         orText={'Already a User? Login.'}
         btnNav={'Login'}
         inputkeybrdValues={keybrdValues}
         secureVal={secureTextValues}
-        validate={validation}
+        validate={() => {
+          if (!loading) {
+            validation();
+          }
+        }}
         onupdatetext={(index, val) => {
           if (index === 0) {
             setfirstName(val);

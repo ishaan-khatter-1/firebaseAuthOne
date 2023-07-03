@@ -1,5 +1,6 @@
 import {StyleSheet} from 'react-native';
 import ColorConstants from '../../assets/colorContants';
+import fonts from '../../assets/fonts';
 
 const styles = StyleSheet.create({
   mainContainer: {
@@ -39,11 +40,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 25,
     borderRadius: 5,
+    // fontFamily: fonts.REGULAR,
   },
   lgnText: {
     fontWeight: '700',
     fontSize: 18,
     color: ColorConstants.lgnText,
+    fontFamily: fonts.BOLD,
   },
   opacity: {},
 });

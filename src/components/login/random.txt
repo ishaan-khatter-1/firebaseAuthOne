@@ -1,0 +1,7 @@
+When using email/password authentication with Firebase, the email and password are stored securely within Firebase's Authentication service. Firebase uses secure hashing algorithms to hash and salt passwords before storing them. The hashed passwords are stored in Firebase's backend, and the original passwords are not accessible or viewable by Firebase or any other user.
+
+Firebase Authentication provides a user management system, allowing you to create, authenticate, and manage user accounts within your Firebase project. When a user signs up using their email and password, Firebase securely stores the user's credentials in its backend. The email address is stored as part of the user account information, while the password is hashed and stored in an encrypted format.
+
+When a user logs in with their email and password, Firebase verifies the provided credentials by comparing the hashed password stored in its backend with the hashed version of the provided password. If the credentials match, Firebase authenticates the user and provides an authentication token, which can be used for subsequent authenticated actions.
+
+It's important to note that Firebase takes security measures to protect user data, including the use of secure protocols and encryption. By using Firebase Authentication, you can leverage these security features and manage user authentication in a secure and reliable manner.

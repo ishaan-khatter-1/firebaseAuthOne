@@ -1,0 +1,154 @@
+import {Alert, View} from 'react-native';
+import React, {useRef, useState} from 'react';
+import auth, {firebase} from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+
+import CommonPage from '../commonPage';
+import {StackActions, useNavigation} from '@react-navigation/native';
+import Snackbar from 'react-native-snackbar';
+
+const Login = () => {
+  const values = ['Email', 'Enter Password'];
+  const keybrdValues = ['email-address', 'default'];
+  const secureTextValues = [false, true];
+  const passRef = useRef();
+  const dummyRef = useRef();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [verificationId, setVerificationId] = useState(null); // To store the verification ID from Firebase
+  const [verificationCode, setVerificationCode] = useState('');
+  const [loginMethod, setLoginMethod] = useState('email');
+  const refArr = [dummyRef, passRef];
+  const submitRefArr = [() => passRef.current.focus()];
+  const blurOnSubmitValues = [false, true];
+  const {navigate, dispatch} = useNavigation();
+
+  const returnKeyTypeValues = ['next', 'done'];
+  const emailRex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  const passRex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const phoneRegex = /^[+]?[0-9]{10,13}$/; // Adjust the regex pattern according to your phone number format
+
+  const validation = async () => {
+    if (loginMethod === 'email') {
+      // Email/Password authentication
+      // ...
+    } else if (loginMethod === 'phone') {
+      // Phone number authentication
+      if (phoneNumber === '') {
+        Snackbar.show({
+          text: 'Phone number field cannot be empty.',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        return null;
+      } else if (!phoneRegex.test(phoneNumber)) {
+        Snackbar.show({
+          text: 'Invalid phone number.',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        return null;
+      }
+
+      try {
+        const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+        setVerificationId(confirmation.verificationId); // Store the verification ID
+
+        // Prompt the user to enter the OTP
+        // You can navigate to a new screen with an input field to enter the OTP and handle verification there
+        // For simplicity, let's display an alert with the OTP
+        Alert.alert('OTP Sent', 'Please enter the OTP received.');
+
+        // Alternatively, you can automatically verify the OTP if the code is received through SMS
+        // const credential = firebase.auth.PhoneAuthProvider.credential(
+        //   confirmation.verificationId,
+        //   verificationCode,
+        // );
+        // await auth().signInWithCredential(credential);
+      } catch (error) {
+        console.error(error);
+        Snackbar.show({
+          text: 'Failed to send OTP. Please try again.',
+          duration: Snackbar.LENGTH_SHORT,
+        });
+      }
+    }
+  };
+
+  const handleLoginMethodChange = (method) => {
+    setLoginMethod(method);
+  };
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: 'rgb(49, 26, 93)',
+        paddingTop: '5%',
+      }}>
+      <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+        <TouchableOpacity
+          onPress={() => handleLoginMethodChange('email')}
+          style={{
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            borderBottomWidth: 2,
+            borderBottomColor: loginMethod === 'email' ? 'white' : 'transparent',
+          }}>
+          <Text style={{color: 'white'}}>Email/Password</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleLoginMethodChange('phone')}
+          style={{
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            borderBottomWidth: 2,
+            borderBottomColor: loginMethod === 'phone' ? 'white' : 'transparent',
+          }}>
+          <Text style={{color: 'white'}}>Phone Number</Text>
+        </TouchableOpacity>
+      </View>
+      {loginMethod === 'email' ? (
+        <CommonPage
+          headerText={'Login'}
+          inputVal={values}
+          btnText={'Login'}
+          orText={'New User?'}
+          btnNav={'SignUp'}
+          inputkeybrdValues={keybrdValues}
+          secureVal={secureTextValues}
+          validate={() => validation()}
+          onupdatetext={(index, val) => {
+            if (index === 0) {
+              setEmail(val);
+            } else if (index === 1) {
+              setPassword(val);
+            }
+          }}
+          onsubmitvalues={submitRefArr}
+          passRefVal={refArr}
+          blurOnSubmitVal={blurOnSubmitValues}
+          returnKeyTypeVal={returnKeyTypeValues}
+        />
+      ) : (
+        <CommonPage
+          headerText={'Login'}
+          inputVal={['Phone Number']}
+          btnText={'Login'}
+          orText={'New User?'}
+          btnNav={'SignUp'}
+          inputkeybrdValues={['phone-pad']}
+          validate={() => validation()}
+          onupdatetext={(index, val) => setPhoneNumber(val)}
+          onsubmitvalues={submitRefArr}
+          passRefVal={refArr}
+          blurOnSubmitVal={blurOnSubmitValues}
+          returnKeyTypeVal={returnKeyTypeValues}
+        />
+      )}
+    </View>
+  );
+};
+
+export default Login;

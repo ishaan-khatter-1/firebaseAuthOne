@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, Button} from 'react-native';
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import CommonInput from '../commonInput';
@@ -51,6 +51,7 @@ const CommonPage = ({
             returnKeyTypeFirst={returnKeyTypeValues}
           />
         </View>
+
         <TouchableOpacity
           style={[
             styles.lgnBtn,

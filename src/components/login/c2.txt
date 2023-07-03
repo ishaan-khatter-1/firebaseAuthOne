@@ -1,0 +1,172 @@
+import {ActivityIndicator, Alert, View} from 'react-native';
+import React, {useRef, useState} from 'react';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+
+import CommonPage from '../commonPage';
+import {StackActions, useNavigation} from '@react-navigation/native';
+import Snackbar from 'react-native-snackbar';
+
+const Login = () => {
+  const values = ['Email', 'Enter Password'];
+  const keybrdValues = ['email-address', 'default'];
+  const secureTextValues = [false, true];
+  const passRef = useRef();
+  const dummyRef = useRef();
+
+  const [loading, setLoading] = useState(false);
+  // const passRefValues = [passRef];
+  // const onsubmiteditingvalues = [passRef.current?.focus()];
+
+  //
+  // useStates
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  // const [opacityBtn, setOpacityBtn] = useState(0.4);
+
+  // const [input, setInput] = useState('');
+  // const;
+  const refArr = [dummyRef, passRef];
+  const submitRefArr = [() => passRef.current.focus()];
+  const blurOnSubmitValues = [false, true];
+  const {navigate, dispatch} = useNavigation();
+
+  const returnKeyTypeValues = ['next', 'done'];
+  const emailRex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  const passRex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  const validation = async () => {
+    // let emailValidation = validationFunctionEmail();
+    // let passwordValidation = validationFunctionPassword();
+    console.log(email);
+    if (email === '') {
+      // Alert.alert('Email field cannot be empty.');
+      Snackbar.show({
+        text: 'Email field cannot be empty.',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return null;
+    } else if (!emailRex.test(email)) {
+      // Alert.alert('Entry valid input in the form of example@xyz.xyz');
+      Snackbar.show({
+        text: 'Entry valid input in the form of example@xyz.xyz',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return null;
+    }
+
+    if (password === '') {
+      // Alert.alert('Password cannot be empty');
+      Snackbar.show({
+        text: 'Password cannot be empty',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return null;
+    } else if (!passRex.test(password)) {
+      // Alert.alert(
+      //   'Password must contain atleast 8 characters which must have at least 1 number, atleast 1 Uppercase letter, and atleast 1 special character.',
+      // );
+      Snackbar.show({
+        text: 'Password must contain atleast 8 characters which must have at least 1 number, atleast 1 Uppercase letter, and atleast 1 special character.',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+      return null;
+    }
+    setLoading(true);
+
+    if (emailRex.test(email) && passRex.test(password)) {
+      // Alert.alert('Login Successful.');
+      try {
+        const userCredentials = await auth().signInWithEmailAndPassword(
+          email,
+          password,
+        );
+        // console.log(userCredentials.user);
+        const usersCollection = await firestore()
+          .collection('users')
+          .doc(userCredentials.user.uid)
+          .get();
+        // console.log(usersCollection.data);
+        // const userData = usersCollection.data();
+        if (userCredentials.user.emailVerified) {
+          dispatch(StackActions.replace('Home', usersCollection.data()));
+        } else {
+          // Alert.alert('Please Verify through email');
+
+          Snackbar.show({
+            text: 'Please Verify through email',
+            duration: Snackbar.LENGTH_SHORT,
+          });
+          await auth().currentUser?.sendEmailVerification();
+          await auth().signOut();
+        }
+        // dispatch(StackActions.replace('Home'));
+      } catch (error) {
+        if (error.code === 'auth/operation-not-allowed') {
+          console.log('Enable anonymous in your firebase console.');
+        }
+
+        console.error(error);
+      }
+      return 1;
+    }
+    setLoading(false);
+  };
+
+  // const opacityCh = () => {
+  //   if (passRex.test(password) && emailRex.test(email)) {
+  //     setOpacityBtn(1);
+  //   } else {
+  //     setOpacityBtn(0.4);
+  //   }
+  // };
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: 'rgb(49, 26, 93)',
+        paddingTop: '5%',
+      }}>
+      <CommonPage
+        headerText={'Login'}
+        inputVal={values}
+        btnText={
+          loading ? (
+            <View style={{position: 'absolute', top: '45%', left: '45%'}}>
+              <ActivityIndicator size="large" color="white" />
+            </View>
+          ) : (
+            'Login'
+          )
+        }
+        orText={'New User?'}
+        btnNav={'SignUp'}
+        inputkeybrdValues={keybrdValues}
+        secureVal={secureTextValues}
+        validate={() => validation()}
+        onupdatetext={(index, val) => {
+          if (index === 0) {
+            setEmail(val);
+          } else if (index === 1) {
+            setPassword(val);
+          }
+          // opacityCh();
+        }}
+        onsubmitvalues={submitRefArr}
+        passRefVal={refArr} // passRefVal={passRef}
+        blurOnSubmitVal={blurOnSubmitValues}
+        returnKeyTypeVal={returnKeyTypeValues}
+        // opacity={opacityBtn}
+      />
+      {/* {loading && (
+        <View style={{position: 'absolute', top: '45%', left: '45%'}}>
+          <ActivityIndicator size="large" color="white" />
+        </View>
+      )} */}
+    </View>
+  );
+};
+
+export default Login;
