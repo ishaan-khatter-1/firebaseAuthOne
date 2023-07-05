@@ -1,4 +1,11 @@
-import {ActivityIndicator, Alert, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 import React, {useRef, useState} from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -6,6 +13,9 @@ import firestore from '@react-native-firebase/firestore';
 import CommonPage from '../commonPage';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import Snackbar from 'react-native-snackbar';
+import CommonInput from '../commonInput';
+import {CountryPicker, PhoneNumberInput} from 'react-native-phone-number-input';
+import * as RNLocalize from 'react-native-localize';
 
 const Login = () => {
   const values = ['Email', 'Enter Password'];
@@ -22,6 +32,7 @@ const Login = () => {
   // useStates
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   // const [opacityBtn, setOpacityBtn] = useState(0.4);
 
   // const [input, setInput] = useState('');
@@ -124,57 +135,118 @@ const Login = () => {
   // };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: 'rgb(49, 26, 93)',
-        paddingTop: '5%',
-      }}>
-      <CommonPage
-        headerText={'Login'}
-        inputVal={values}
-        btnText={
-          loading ? (
-            <View>
-              <ActivityIndicator size="large" color="white" />
-            </View>
-          ) : (
-            'Login'
-          )
-        }
-        orText={'New User?'}
-        btnNav={'SignUp'}
-        inputkeybrdValues={keybrdValues}
-        secureVal={secureTextValues}
-        validate={() => {
+    <View style={styles.container}>
+      <Text style={styles.header}>User Login</Text>
+      <View style={{width: '100%'}}>
+        <CommonInput
+          plcHolder={'Email'}
+          keybrdType={'email-address'}
+          secureText={false}
+          // opacityBtn={undefined}
+          onUpdateText={val => {
+            setEmail(val);
+          }}
+          onSubmitEditting={() => passRef.current.focus()}
+          // passRef={emailRef}
+          blurOnSubmitOne={false}
+          returnKeyTypeFirst={'next'}
+        />
+
+        <CommonInput
+          plcHolder={'Password'}
+          keybrdType={'default'}
+          secureText={true}
+          // opacityBtn={undefined}
+          onUpdateText={val => {
+            setPassword(val);
+          }}
+          onSubmitEditting={() => confirmPassRef.current.focus()}
+          passRef={passRef}
+          blurOnSubmitOne={false}
+          returnKeyTypeFirst={'next'}
+        />
+      </View>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
           if (!loading) {
             validation();
           }
         }}
-        onupdatetext={(index, val) => {
-          if (index === 0) {
-            setEmail(val);
-          } else if (index === 1) {
-            setPassword(val);
-          }
-          // opacityCh();
-        }}
-        onsubmitvalues={submitRefArr}
-        passRefVal={refArr} // passRefVal={passRef}
-        blurOnSubmitVal={blurOnSubmitValues}
-        returnKeyTypeVal={returnKeyTypeValues}
-        // opacity={opacityBtn}
-      />
-      {/* {loading && (
-        <View style={{position: 'absolute', top: '45%', left: '45%'}}>
+        disabled={loading}>
+        {loading ? (
           <ActivityIndicator size="large" color="white" />
-        </View>
-      )} */}
+        ) : (
+          <Text style={styles.buttonText}>Sign In</Text>
+        )}
+      </TouchableOpacity>
+
+      <Text style={styles.orText}>Or</Text>
+
+      <TouchableOpacity onPress={() => navigate('SignUp')}>
+        <Text style={styles.signInText}>Sign Up</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 export default Login;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgb(49, 26, 93)',
+    padding: 16,
+  },
+  header: {
+    fontSize: 28,
+    fontFamily: 'Roboto',
+    fontWeight: 'bold',
+    marginBottom: 32,
+    color: '#FFFFFF',
+  },
+  input: {
+    width: '100%',
+    height: 48,
+    backgroundColor: 'rgb(211,204,224)',
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    color: '#333333',
+  },
+  button: {
+    width: '100%',
+    height: 48,
+    backgroundColor: 'rgb(158,140,255)',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontFamily: 'Roboto',
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  orText: {
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    color: '#FFFFFF',
+    marginVertical: 16,
+  },
+  signInText: {
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    color: '#FFFFFF',
+    marginBottom: 16,
+  },
+});
 
 // import {Alert, View, TouchableOpacity, Text} from 'react-native';
 // import React, {useRef, useState} from 'react';

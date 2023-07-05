@@ -1,23 +1,31 @@
-import {ActivityIndicator, Alert, View} from 'react-native';
-import React, {useRef, useState} from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 import CommonPage from '../commonPage';
 import {useNavigation} from '@react-navigation/native';
 import Snackbar from 'react-native-snackbar';
+import CommonInput from '../commonInput';
+import fonts from '../../assets/fonts';
+import PhoneNumberInput from 'react-native-phone-number-input';
+import * as RNLocalize from 'react-native-localize';
+import ImagePicker from 'react-native-image-crop-picker';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import styles from './styles';
+import {request, PERMISSIONS} from 'react-native-permissions';
+import storage from '@react-native-firebase/storage';
 
 const SignUp = () => {
-  const values = [
-    'First Name',
-    'Last Name',
-    'Email',
-    'Phone',
-    'Password',
-    'Confirm Password',
-  ];
-  const keybrdValues = ['default', 'default', 'email-address', 'numeric'];
-  const secureTextValues = [false, false, false, false, true, true];
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setfirstName] = useState('');
@@ -25,6 +33,11 @@ const SignUp = () => {
   const [phoneNumber, setphoneNumber] = useState('');
   const [confirmPass, setconfirmPass] = useState('');
   const [loading, setLoading] = useState(false);
+  const [country, setCountry] = useState('');
+  const [formattedText, setFormattedText] = useState('');
+  const [imagePic, setImagePic] = useState({});
+  const [imgUrl, setImgUrl] = useState(null);
+  const refRBSheet = useRef();
   // const [opacityBtn, setOpacityBtn] = useState(0.4);
 
   const lastNameRef = useRef();
@@ -35,24 +48,18 @@ const SignUp = () => {
   const dummyRef = useRef();
   const {navigate} = useNavigation();
 
-  const refArr = [
-    dummyRef,
-    lastNameRef,
-    emailRef,
-    phoneRef,
-    passRef,
-    confirmPassRef,
-  ];
-  const submitRefArr = [
-    () => lastNameRef.current.focus(),
-    () => emailRef.current.focus(),
-    () => phoneRef.current.focus(),
-    () => passRef.current.focus(),
-    () => confirmPassRef.current.focus(),
-  ];
-  const blurOnSubmitValues = [false, false, false, false, false, true];
+  useEffect(() => {
+    const defaultCountryCode = RNLocalize.getCountry();
+    setCountry(defaultCountryCode);
+  }, []);
 
-  const returnKeyTypeValues = ['next', 'next', 'next', 'next', 'next', 'done'];
+  const handleCountrySelect = country => {
+    setCountry(country);
+  };
+
+  const handlePhoneNumberChange = text => {
+    setFormattedText(text);
+  };
 
   const emailRex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   const passRex =
@@ -163,6 +170,7 @@ const SignUp = () => {
           lastName: lastName,
           email: email,
           phoneNumber: phoneNumber,
+          imageUpload: imgUrl,
         };
         await firestore().collection('users').doc(res.user.uid).set(usersData);
         // console.log('res:: ' + res);  // undefined
@@ -223,52 +231,277 @@ const SignUp = () => {
   //     setOpacityBtn(0.4);
   //   }
   // };
+  const askForPermissions = permission => {
+    request(permission).then(result => {
+      console.log(result);
+    });
+  };
+  // const galleryPicker = () => {
+  //   askForPermissions(PERMISSIONS.ANDROID.READ_MEDIA_IMAGES);
+  //   ImagePicker.openPicker({
+  //     width: 300,
+  //     height: 400,
+  //     cropping: true,
+  //   }).then(async image => {
+  //     console.log(image.path);
+  //     setImagePic(image.path);
+  //     const reference = storage().ref(image.path);
+  //     setImgUrls(reference.getDownloadURL());
+  //   });
+  // };
+
+  const galleryPicker = () => {
+    askForPermissions(PERMISSIONS.ANDROID.READ_MEDIA_IMAGES);
+    ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then(async image => {
+      console.log(image.path);
+      setImagePic(image.path);
+
+      const reference = storage().ref(`images/${image.filename}`);
+      const task = reference.putFile(image.path);
+
+      task.on(
+        'state_changed',
+        snapshot => {
+          // Handle upload progress if needed
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload progress: ${progress}%`);
+        },
+        error => {
+          // Handle upload error
+          console.log('Upload error:', error);
+        },
+        async () => {
+          // Handle upload success
+          const downloadURL = await reference.getDownloadURL();
+          console.log('Download URL:', downloadURL);
+          setImgUrl(downloadURL);
+        },
+      );
+    });
+  };
+
+  const cameraPicker = () => {
+    askForPermissions(PERMISSIONS.ANDROID.CAMERA);
+
+    ImagePicker.openCamera({
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then(image => {
+      console.log(image.path);
+      setImagePic(image.path);
+      const reference = storage().ref(`images/${image.filename}`);
+      const task = reference.putFile(image.path);
+
+      task.on(
+        'state_changed',
+        snapshot => {
+          // Handle upload progress if needed
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload progress: ${progress}%`);
+        },
+        error => {
+          // Handle upload error
+          console.log('Upload error:', error);
+        },
+        async () => {
+          // Handle upload success
+          const downloadURL = await reference.getDownloadURL();
+          console.log('Download URL:', downloadURL);
+          setImgUrl(downloadURL);
+        },
+      );
+    });
+  };
+  console.log('imgPath', imagePic);
+  const BottomSheet = () => {
+    return (
+      <View style={styles.bottomSheet}>
+        <TouchableOpacity style={styles.buttonTwo} onPress={galleryPicker}>
+          <Text style={styles.buttonTextTwo}>Select from Gallery</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonTwo} onPress={cameraPicker}>
+          <Text style={styles.buttonTextTwo}>Choose from Camera</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
-    <View style={{flex: 1}}>
-      <CommonPage
-        headerText={'New User Registration'}
-        inputVal={values}
-        btnText={
-          loading ? (
-            <View>
-              <ActivityIndicator size="large" color="white" />
-            </View>
-          ) : (
-            'Register'
-          )
-        }
-        orText={'Already a User? Login.'}
-        btnNav={'Login'}
-        inputkeybrdValues={keybrdValues}
-        secureVal={secureTextValues}
-        validate={() => {
-          if (!loading) {
-            validation();
-          }
-        }}
-        onupdatetext={(index, val) => {
-          if (index === 0) {
-            setfirstName(val);
-          } else if (index === 1) {
-            setlastName(val);
-          } else if (index === 2) {
-            setEmail(val);
-          } else if (index === 3) {
+    <View style={{flex: 1, backgroundColor: 'rgb(49, 26, 93)'}}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.header}>User Registration</Text>
+        <View style={{width: '100%'}}>
+          <CommonInput
+            plcHolder={'First Name'}
+            keybrdType={'default'}
+            secureText={false}
+            // opacityBtn={undefined}
+            onUpdateText={val => {
+              setfirstName(val);
+            }}
+            onSubmitEditting={() => lastNameRef.current.focus()}
+            passRef={dummyRef}
+            blurOnSubmitOne={false}
+            returnKeyTypeFirst={'next'}
+          />
+          <CommonInput
+            plcHolder={'Last Name'}
+            keybrdType={'default'}
+            secureText={false}
+            // opacityBtn={undefined}
+            onUpdateText={val => {
+              setlastName(val);
+            }}
+            onSubmitEditting={() => emailRef.current.focus()}
+            passRef={lastNameRef}
+            blurOnSubmitOne={false}
+            returnKeyTypeFirst={'next'}
+          />
+          <CommonInput
+            plcHolder={'Email'}
+            keybrdType={'email-address'}
+            secureText={false}
+            // opacityBtn={undefined}
+            onUpdateText={val => {
+              setEmail(val);
+            }}
+            // onSubmitEditting={() => phoneRef.current.focus()}
+            onSubmitEditting={() => passRef.current.focus()}
+            passRef={emailRef}
+            blurOnSubmitOne={false}
+            returnKeyTypeFirst={'next'}
+          />
+          {/* <CommonInput
+          plcHolder={'Phone'}
+          keybrdType={'numeric'}
+          secureText={false}
+          // opacityBtn={undefined}
+          onUpdateText={val => {
             setphoneNumber(val);
-          } else if (index === 4) {
-            setPassword(val);
-          } else if (index === 5) {
-            setconfirmPass(val);
-          }
-          // opacityCh();
-        }}
-        onsubmitvalues={submitRefArr}
-        passRefVal={refArr}
-        blurOnSubmitVal={blurOnSubmitValues}
-        returnKeyTypeVal={returnKeyTypeValues}
-        // opacity={opacityBtn}
+          }}
+          onSubmitEditting={() => passRef.current.focus()}
+          passRef={phoneRef}
+          blurOnSubmitOne={false}
+          returnKeyTypeFirst={'next'}
+        /> */}
+          <PhoneNumberInput
+            // style={{backgroundColor: 'red'}}
+            defaultCode={country}
+            placeholder="Phone Number"
+            onChangeText={setphoneNumber}
+            value={phoneNumber}
+            containerStyle={styles.inputPhoneContainer}
+            textContainerStyle={[styles.inputPhone, {borderRadius: 8}]}
+            withShadow
+            autoFocus
+            layout="first"
+            onChangeTextFormatted={text => setFormattedText(text)}
+            onSelectCountry={handleCountrySelect}
+          />
+          {/* <CountryPicker
+        withCallingCode
+        withFilter
+        withFlag
+        withEmoji
+        countryCode={country}
+        onSelect={handleCountrySelect}
       />
+      <PhoneNumberInput
+        defaultCode={country}
+        layout="first"
+        withShadow
+        autoFocus
+        textContainerStyle={{ padding: 8 }}
+        onChangeFormattedText={handlePhoneNumberChange}
+      /> */}
+          <CommonInput
+            plcHolder={'Password'}
+            keybrdType={'default'}
+            secureText={true}
+            // opacityBtn={undefined}
+            onUpdateText={val => {
+              setPassword(val);
+            }}
+            onSubmitEditting={() => confirmPassRef.current.focus()}
+            passRef={passRef}
+            blurOnSubmitOne={false}
+            returnKeyTypeFirst={'next'}
+          />
+          <CommonInput
+            plcHolder={'Confirm Password'}
+            keybrdType={'default'}
+            secureText={true}
+            // opacityBtn={undefined}
+            onUpdateText={val => {
+              setconfirmPass(val);
+            }}
+            onSubmitEditting={() => {}}
+            passRef={confirmPassRef}
+            blurOnSubmitOne={true}
+            returnKeyTypeFirst={'done'}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.button, {flexDirection: 'row'}]}
+          // onPress={imagePicker}
+          onPress={() => {
+            refRBSheet.current.open();
+          }}>
+          <Image
+            source={require('../../assets/images/camera.png')}
+            style={{width: 30, height: 30, marginRight: 5}}></Image>
+          <Text style={[styles.buttonText, {marginLeft: 5}]}>Add Photo</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            if (!loading) {
+              validation();
+            }
+          }}
+          disabled={loading}>
+          {loading ? (
+            <ActivityIndicator size="large" color="white" />
+          ) : (
+            <Text style={styles.buttonText}>Sign Up</Text>
+          )}
+        </TouchableOpacity>
+
+        <Text style={styles.orText}>Or</Text>
+
+        <TouchableOpacity onPress={() => navigate('Login')}>
+          <Text style={styles.signInText}>Sign In</Text>
+        </TouchableOpacity>
+      </ScrollView>
+      <RBSheet
+        ref={refRBSheet}
+        closeOnDragDown={true}
+        closeOnPressMask={false}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'transparent',
+          },
+          draggableIcon: {
+            backgroundColor: '#000',
+          },
+          container: {
+            backgroundColor: 'rgb(211,204,224)',
+            elevation: 20,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+          },
+        }}>
+        <BottomSheet />
+      </RBSheet>
     </View>
   );
 };

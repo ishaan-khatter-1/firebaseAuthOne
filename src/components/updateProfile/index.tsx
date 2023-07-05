@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,18 @@ import {
   Button,
   Image,
   Alert,
+  ScrollView,
 } from 'react-native';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import Auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Snackbar from 'react-native-snackbar';
 import fonts from '../../assets/fonts';
+import ImagePicker from 'react-native-image-crop-picker';
+import RBSheet from 'react-native-raw-bottom-sheet';
+// import styles from './styles';
+import {request, PERMISSIONS} from 'react-native-permissions';
+import storage from '@react-native-firebase/storage';
 
 const UpdateProfile = ({route}) => {
   const [userData, setUserData] = useState(null);
@@ -21,12 +27,23 @@ const UpdateProfile = ({route}) => {
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [imagePic, setImagePic] = useState({});
+  const [imgUrl, setImgUrl] = useState(null);
+  const refRBSheet = useRef();
 
   const {dispatch} = useNavigation();
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // const updateUserData = data => {
+  //   setUserData(data);
+  //   setFirstName(data?.firstName);
+  //   setLastName(data?.lastName);
+  //   setPhoneNumber(data?.phoneNumber);
+  //   setEmail(data?.email);
+  // };
 
   const loadData = async () => {
     try {
@@ -42,6 +59,7 @@ const UpdateProfile = ({route}) => {
         setLastName(data?.lastName);
         setPhoneNumber(data?.phoneNumber);
         setEmail(data?.email);
+        setImgUrl(data?.imageUpload);
       }
     } catch (error) {
       console.log(error);
@@ -116,10 +134,11 @@ const UpdateProfile = ({route}) => {
     try {
       const userCurrent = Auth().currentUser;
       await firestore().collection('users').doc(userCurrent?.uid).update({
-        firstName,
-        lastName,
-        phoneNumber,
-        email,
+        firstName: firstName,
+        lastName: lastName,
+        phoneNumber: phoneNumber,
+        email: email,
+        imageUpload: imgUrl,
       });
       console.log('Profile updated successfully!');
       Snackbar.show({
@@ -129,6 +148,98 @@ const UpdateProfile = ({route}) => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const askForPermissions = permission => {
+    request(permission).then(result => {
+      console.log(result);
+    });
+  };
+
+  const galleryPicker = () => {
+    askForPermissions(PERMISSIONS.ANDROID.READ_MEDIA_IMAGES);
+    ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then(async image => {
+      console.log(image.path);
+      setImagePic(image.path);
+
+      const reference = storage().ref(`images/${image.filename}`);
+      const task = reference.putFile(image.path);
+
+      task.on(
+        'state_changed',
+        snapshot => {
+          // Handle upload progress if needed
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload progress: ${progress}%`);
+        },
+        error => {
+          // Handle upload error
+          console.log('Upload error:', error);
+        },
+        async () => {
+          // Handle upload success
+          const downloadURL = await reference.getDownloadURL();
+          console.log('Download URL:', downloadURL);
+          setImgUrl(downloadURL);
+        },
+      );
+    });
+  };
+
+  const cameraPicker = () => {
+    askForPermissions(PERMISSIONS.ANDROID.CAMERA);
+
+    ImagePicker.openCamera({
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then(image => {
+      console.log(image.path);
+      setImagePic(image.path);
+      const reference = storage().ref(`images/${image.filename}`);
+      const task = reference.putFile(image.path);
+
+      task.on(
+        'state_changed',
+        snapshot => {
+          // Handle upload progress if needed
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload progress: ${progress}%`);
+        },
+        error => {
+          // Handle upload error
+          console.log('Upload error:', error);
+        },
+        async () => {
+          // Handle upload success
+          const downloadURL = await reference.getDownloadURL();
+          console.log('Download URL:', downloadURL);
+          setImgUrl(downloadURL);
+        },
+      );
+    });
+  };
+  console.log('imgPath', imagePic);
+  const BottomSheet = () => {
+    // const refRBSheet = useRef();
+    /// <reference path="" />
+
+    return (
+      <View style={styles.bottomSheet}>
+        <TouchableOpacity style={styles.buttonTwo} onPress={galleryPicker}>
+          <Text style={styles.buttonTextTwo}>Select from Gallery</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonTwo} onPress={cameraPicker}>
+          <Text style={styles.buttonTextTwo}>Choose from Camera</Text>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   return (
@@ -143,50 +254,78 @@ const UpdateProfile = ({route}) => {
             style={{width: 30, height: 30}}
           />
         </TouchableOpacity>
-        <Text style={styles.headerText}>HI {userData?.firstName}</Text>
+        <Text style={styles.headerText}>HI {firstName}</Text>
       </View>
-      <View style={styles.content}>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>First Name:</Text>
-          <TextInput
-            style={styles.value}
-            value={firstName}
-            onChangeText={setFirstName}
+      <ScrollView>
+        <View style={styles.content}>
+          {imgUrl ? (
+            <TouchableOpacity onPress={() => refRBSheet.current.open()}>
+              <Image
+                // source={{uri: userData?.imageUpload}}
+                source={{uri: imgUrl}}
+                style={{width: 200, height: 220, marginBottom: 20}}></Image>
+            </TouchableOpacity>
+          ) : null}
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>First Name:</Text>
+            <TextInput
+              style={styles.value}
+              value={firstName}
+              onChangeText={setFirstName}
+            />
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Last Name:</Text>
+            <TextInput
+              style={styles.value}
+              value={lastName}
+              onChangeText={setLastName}
+            />
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Phone Number:</Text>
+            <TextInput
+              style={styles.value}
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+            />
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Email:</Text>
+            <TextInput
+              style={styles.value}
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
+          <Button
+            title="Update Profile"
+            onPress={handleUpdateProfile}
+            disabled={!firstName || !lastName || !phoneNumber || !email}
           />
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Last Name:</Text>
-          <TextInput
-            style={styles.value}
-            value={lastName}
-            onChangeText={setLastName}
-          />
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Phone Number:</Text>
-          <TextInput
-            style={styles.value}
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-          />
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Email:</Text>
-          <TextInput
-            style={styles.value}
-            value={email}
-            onChangeText={setEmail}
-          />
-        </View>
-        <Button
-          title="Update Profile"
-          onPress={handleUpdateProfile}
-          disabled={!firstName || !lastName || !phoneNumber || !email}
-        />
-        {/* <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          {/* <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Text style={styles.buttonText}>LOGOUT</Text>
         </TouchableOpacity> */}
-      </View>
+          {/* <BottomSheet /> */}
+          <RBSheet
+            ref={refRBSheet}
+            closeOnDragDown={true}
+            closeOnPressMask={false}
+            customStyles={{
+              wrapper: {
+                backgroundColor: 'transparent',
+                // opacity: 0.5,
+                borderTopLeftRadius: 10,
+                borderTopRightRadius: 100,
+              },
+              draggableIcon: {
+                backgroundColor: '#000',
+              },
+            }}>
+            <BottomSheet />
+          </RBSheet>
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -249,6 +388,35 @@ const styles = StyleSheet.create({
     // fontWeight: 'bold',
     textAlign: 'center',
     fontFamily: fonts.BOLD,
+  },
+  bottomSheet: {
+    flex: 1,
+    backgroundColor: '#2c3e50',
+    padding: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -3,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4.65,
+    // elevation: 6,
+  },
+  buttonTwo: {
+    backgroundColor: '#f9f9f9',
+    // backgroundColor: 'rgb(158,140,255)',
+
+    paddingVertical: 12,
+    marginBottom: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  buttonTextTwo: {
+    fontSize: 16,
+    color: '#2c3e50',
+    fontWeight: 'bold',
   },
 });
 

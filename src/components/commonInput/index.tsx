@@ -15,25 +15,25 @@ const CommonInput = ({
 }) => {
   return (
     <View>
-      {plcHolder.map((item, index) => (
-        <TextInput
-          key={index}
-          style={styles.inputStyle}
-          placeholder={item}
-          keyboardType={keybrdType[index]}
-          secureTextEntry={secureText[index]}
-          onChangeText={val => onUpdateText(index, val)}
-          onSubmitEditing={onSubmitEditting[index]}
-          ref={passRef[index]}
-          blurOnSubmit={blurOnSubmitOne[index]}
-          returnKeyType={returnKeyTypeFirst[index]}
+      {/* {plcHolder.map((item, index) => ( */}
+      <TextInput
+        // key={index}
+        style={styles.inputStyle}
+        placeholder={plcHolder}
+        keyboardType={keybrdType}
+        secureTextEntry={secureText}
+        onChangeText={val => onUpdateText(val)}
+        onSubmitEditing={onSubmitEditting}
+        ref={passRef}
+        blurOnSubmit={blurOnSubmitOne}
+        returnKeyType={returnKeyTypeFirst}
 
-          // ref={ref => (passRef[index] = ref)}
-          // onEndEditing={opacityPass}
-          // ref={pass_ref[index]}
-          // blurOnSubmit={blurOnSubmit}
-        />
-      ))}
+        // ref={ref => (passRef[index] = ref)}
+        // onEndEditing={opacityPass}
+        // ref={pass_ref[index]}
+        // blurOnSubmit={blurOnSubmit}
+      />
+      {/* ))} */}
     </View>
   );
 };

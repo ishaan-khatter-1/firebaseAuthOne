@@ -1,0 +1,111 @@
+import {StyleSheet} from 'react-native';
+
+const styles = StyleSheet.create({
+  container: {
+    // flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgb(49, 26, 93)',
+    padding: 16,
+  },
+  header: {
+    fontSize: 28,
+    fontFamily: 'Roboto',
+    fontWeight: 'bold',
+    marginBottom: 32,
+    color: '#FFFFFF',
+  },
+  input: {
+    width: '100%',
+    height: 48,
+    backgroundColor: 'rgb(211,204,224)',
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    color: '#333333',
+    borderRadius: 8,
+  },
+  inputPhoneContainer: {
+    width: '100%',
+    height: 80,
+    backgroundColor: 'rgb(211,204,224)',
+    borderRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomEndRadius: 8,
+    marginBottom: 16,
+  },
+  inputPhone: {
+    width: '100%',
+    height: '100%',
+    // backgroundColor: 'red',
+    backgroundColor: 'rgb(211,204,224)',
+
+    // borderRadius: 8,
+    // marginBottom: 16,
+    // paddingHorizontal: 16,
+    padding: 0,
+    fontSize: 10,
+    fontFamily: 'Roboto',
+    color: '#333333',
+  },
+  button: {
+    width: '100%',
+    height: 48,
+    backgroundColor: 'rgb(158,140,255)',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontFamily: 'Roboto',
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  orText: {
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    color: '#FFFFFF',
+    marginVertical: 16,
+  },
+  signInText: {
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    color: '#FFFFFF',
+    marginBottom: 16,
+  },
+  bottomSheet: {
+    flex: 1,
+    backgroundColor: 'rgb(49, 26, 93)',
+    padding: 16,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -3,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4.65,
+    // elevation: 6,
+  },
+  buttonTwo: {
+    // backgroundColor: '#f9f9f9',
+    backgroundColor: 'rgb(158,140,255)',
+
+    paddingVertical: 12,
+    marginBottom: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  buttonTextTwo: {
+    fontSize: 16,
+    color: '#FFF',
+    fontWeight: 'bold',
+  },
+});
+
+export default styles;

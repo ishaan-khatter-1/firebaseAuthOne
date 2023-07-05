@@ -82,6 +82,7 @@ const Home = ({route}) => {
         <Text style={styles.headerText}>
           Welcome Home {userData?.firstName}
         </Text>
+
         <TouchableOpacity
           onPress={() => {
             dispatch(StackActions.replace('UpdateProfile'));
@@ -95,6 +96,11 @@ const Home = ({route}) => {
       </View>
 
       <View style={styles.content}>
+        {userData?.imageUpload ? (
+          <Image
+            source={{uri: userData?.imageUpload}}
+            style={{width: 200, height: 220, marginBottom: 20}}></Image>
+        ) : null}
         <View style={styles.infoContainer}>
           <Text style={styles.label}>First Name:</Text>
           {loading ? (
