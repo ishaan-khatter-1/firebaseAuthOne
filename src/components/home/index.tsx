@@ -164,9 +164,10 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 24,
-    fontWeight: 'bold',
+    // fontWeight: '600',
     color: 'white',
     textAlign: 'center',
+    fontFamily: fonts.BOLDITALIC,
   },
   content: {
     flex: 1,
@@ -180,14 +181,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    // fontWeight: 'bold',
     marginRight: 10,
     color: '#2c3e50',
+    fontFamily: fonts.BOLD,
   },
   value: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#444444',
+    fontFamily: fonts.MEDIUM,
   },
   logoutButton: {
     marginTop: 30,
@@ -199,9 +202,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
     textAlign: 'center',
-    // fontFamily: fonts.BOLD,
+    fontFamily: fonts.BOLD,
   },
 });
 

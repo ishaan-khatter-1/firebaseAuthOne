@@ -3,6 +3,7 @@ import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import CommonInput from '../commonInput';
 import styles from './styles';
+import fonts from '../../assets/fonts';
 
 // interface Common {
 //   headerText: string;
@@ -39,6 +40,33 @@ const CommonPage = ({
         <Text style={styles.headerText}>{headerText}</Text>
       </View>
       <View style={styles.inputCardView}>
+        {/* {secureTextValues === false ? (
+          <View style={styles.inputView}>
+            <CommonInput
+              plcHolder={values}
+              keybrdType={keybrdValues}
+              secureText={secureTextValues}
+              onUpdateText={onupdatetext}
+              passRef={passRefValues}
+              onSubmitEditting={onsubmitEditingvalues}
+              blurOnSubmitOne={blurOnSubmitValues}
+              returnKeyTypeFirst={returnKeyTypeValues}
+            />
+          </View>
+        ) : (
+          <View style={styles.inputView}>
+            <CommonInput
+              plcHolder={values}
+              keybrdType={keybrdValues}
+              secureText={secureTextValues}
+              onUpdateText={onupdatetext}
+              passRef={passRefValues}
+              onSubmitEditting={onsubmitEditingvalues}
+              blurOnSubmitOne={blurOnSubmitValues}
+              returnKeyTypeFirst={returnKeyTypeValues}
+            />
+          </View>
+        )} */}
         <View style={styles.inputView}>
           <CommonInput
             plcHolder={values}
@@ -60,12 +88,19 @@ const CommonPage = ({
           onPress={validate}>
           <Text style={styles.lgnText}>{btnText}</Text>
         </TouchableOpacity>
-        <Text style={{color: 'white'}}>Or </Text>
+        <Text style={{color: 'white', fontFamily: fonts.MEDIUMITALIC}}>Or</Text>
         <TouchableOpacity
           onPress={() => {
             navigate(btnNav);
           }}>
-          <Text style={{margin: 10, color: 'white'}}>{orText}</Text>
+          <Text
+            style={{
+              margin: 10,
+              color: 'white',
+              fontFamily: fonts.MEDIUMITALIC,
+            }}>
+            {orText}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

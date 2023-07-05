@@ -15,9 +15,10 @@ const styles = StyleSheet.create({
     // backgroundColor: 'red',
   },
   headerText: {
-    fontWeight: '700',
+    // fontWeight: '700',
     fontSize: 25,
     color: ColorConstants.headerText,
+    fontFamily: fonts.BOLDITALIC,
   },
   inputCardView: {
     flex: 1,
@@ -40,11 +41,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 25,
     borderRadius: 5,
-    // fontFamily: fonts.REGULAR,
+    fontFamily: fonts.REGULAR,
   },
   lgnText: {
-    fontWeight: '700',
-    fontSize: 18,
+    // fontWeight: '700',
+    fontSize: 20,
     color: ColorConstants.lgnText,
     fontFamily: fonts.BOLD,
   },

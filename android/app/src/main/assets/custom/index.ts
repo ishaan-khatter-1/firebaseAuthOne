@@ -1,6 +1,7 @@
 const fonts = {
   BOLD: 'DancingScript-Bold',
-  // REGULAR: 'JosefinSans-Regular',
-  // SEMIBOLD: 'JosefinSans-SemiBold',
+  REGULAR: 'DancingScript-Regular',
+  SEMIBOLD: 'DancingScript-SemiBold',
+  MEDIUM: 'DancingScript-Medium',
 };
 export default fonts;

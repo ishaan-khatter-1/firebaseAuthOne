@@ -13,6 +13,7 @@ import {StackActions, useNavigation} from '@react-navigation/native';
 import Auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Snackbar from 'react-native-snackbar';
+import fonts from '../../assets/fonts';
 
 const UpdateProfile = ({route}) => {
   const [userData, setUserData] = useState(null);
@@ -204,9 +205,10 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 24,
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
+    fontFamily: fonts.BOLD,
   },
   content: {
     flex: 1,
@@ -221,9 +223,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
     marginRight: 10,
     color: '#2c3e50',
+    fontFamily: fonts.BOLD,
   },
   value: {
     fontSize: 16,
@@ -243,8 +246,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
     textAlign: 'center',
+    fontFamily: fonts.BOLD,
   },
 });
 
